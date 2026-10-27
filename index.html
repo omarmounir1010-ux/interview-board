@@ -1,0 +1,1118 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Interview Board</title>
+<meta name="description" content="All applicants, general and committee questions, scores and notes in one place.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<style>
+/* ============ COLORS & FONTS (same as the Lovable version) ============ */
+:root{
+  color-scheme: light;
+  --radius:.75rem;
+  --background:oklch(97% .012 85);
+  --foreground:oklch(22% .03 160);
+  --card:oklch(99.5% .005 85);
+  --primary:oklch(42% .09 160);
+  --primary-foreground:oklch(98% .01 85);
+  --secondary:oklch(93% .02 85);
+  --secondary-foreground:oklch(25% .03 160);
+  --muted:oklch(93% .015 85);
+  --muted-foreground:oklch(50% .03 160);
+  --accent:oklch(80% .15 75);
+  --accent-foreground:oklch(22% .03 160);
+  --destructive:oklch(58% .2 27);
+  --destructive-foreground:oklch(98% 0 0);
+  --border:oklch(88% .02 85);
+  --success:oklch(62% .15 150);
+  --success-foreground:oklch(98% .01 85);
+  --warning:oklch(80% .15 75);
+  --warning-foreground:oklch(22% .03 160);
+  --gradient-hero:linear-gradient(135deg, oklch(42% .09 160), oklch(32% .07 180));
+  --shadow-card:0 8px 24px -12px color-mix(in oklab, var(--primary) 35%, transparent);
+  --r-md:calc(var(--radius) - 2px);
+  --r-lg:var(--radius);
+  --r-xl:calc(var(--radius) + 4px);
+  --font-sans:"DM Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-display:"Space Grotesk", ui-sans-serif, sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;border:0 solid var(--border)}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--background);color:var(--foreground);font-family:var(--font-sans);font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit;background:transparent}
+button{cursor:pointer}
+input,textarea,select{outline:none}
+input:focus-visible,textarea:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid var(--primary);outline-offset:1px}
+ol,ul{list-style:none}
+h1,h2,h3{font-size:inherit;font-weight:inherit}
+svg{flex-shrink:0}
+.display{font-family:var(--font-display)}
+.muted{color:var(--muted-foreground)}
+
+/* ============ LAYOUT ============ */
+.app{display:flex;flex-direction:column;min-height:100vh}
+.side{display:flex;flex-direction:column;flex-shrink:0;width:100%;background:var(--card);border-bottom-width:1px}
+.main{flex:1;min-width:0;padding:1rem}
+@media (min-width:640px){
+  .app{flex-direction:row}
+  .side{position:sticky;top:0;height:100dvh;width:14rem;border-bottom-width:0;border-right-width:1px}
+}
+@media (min-width:1024px){.side{width:16rem}.main{padding:1.5rem}}
+
+/* ============ SIDEBAR ============ */
+.hero{background-image:var(--gradient-hero);color:var(--primary-foreground);padding:1rem}
+.hero h1{font-family:var(--font-display);font-size:1.25rem;line-height:1.75rem;font-weight:700}
+.hero p{font-size:.75rem;line-height:1rem;opacity:.8}
+.live{display:inline-flex;align-items:center;gap:.375rem;margin-top:.5rem;font-size:.6875rem;line-height:1rem;background:color-mix(in oklab, var(--primary-foreground) 14%, transparent);border-radius:999px;padding:.125rem .5rem}
+.live i{width:.4rem;height:.4rem;border-radius:999px;background:var(--success)}
+.live.off i{background:var(--destructive)}
+.live.local i{background:var(--accent)}
+.tabs{display:flex;gap:.25rem;padding:.75rem}
+.tab{flex:1;border-radius:var(--r-md);padding:.375rem .5rem;font-size:.75rem;line-height:1rem;font-weight:500;background:var(--secondary);color:var(--secondary-foreground)}
+.tab.on{background:var(--primary);color:var(--primary-foreground)}
+.side-inputs{display:flex;flex-direction:column;gap:.5rem;padding:0 .75rem}
+.row{display:flex;gap:.25rem}
+.inp{width:100%;border-radius:var(--r-md);border-width:1px;background:var(--background);padding:.375rem .5rem;font-size:.875rem;line-height:1.25rem}
+.plus{border-radius:var(--r-md);background:var(--accent);color:var(--accent-foreground);padding:0 .75rem;font-size:.875rem;font-weight:700}
+.list{margin-top:.5rem;max-height:10rem;flex:1;overflow-y:auto;padding:0 .5rem 1rem}
+@media (min-width:640px){.list{max-height:none}}
+.li{display:flex;width:100%;align-items:center;justify-content:space-between;gap:.5rem;border-radius:var(--r-md);padding:.5rem .75rem;text-align:left;font-size:.875rem;line-height:1.25rem}
+.li:hover{background:var(--muted)}
+.li.on{background:var(--primary);color:var(--primary-foreground)}
+.li .nm{display:flex;min-width:0;align-items:center;gap:.5rem}
+.li .nm span:last-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.li .pc{font-size:.75rem;opacity:.7;display:flex;align-items:center;gap:.375rem}
+.dot{width:.5rem;height:.5rem;flex-shrink:0;border-radius:999px}
+.bg-accept{background:var(--success)}.bg-maybe{background:var(--warning)}.bg-reject{background:var(--destructive)}
+.rec{width:.45rem;height:.45rem;border-radius:999px;background:var(--destructive);animation:pulse 1.2s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.25}}
+.side-foot{display:flex;flex-direction:column;gap:.375rem;margin:.75rem}
+.btn-outline{border-radius:var(--r-md);border-width:1px;padding:.5rem .75rem;font-size:.875rem;line-height:1.25rem}
+.btn-outline:hover{background:var(--muted)}
+.linkish{font-size:.75rem;color:var(--muted-foreground);text-align:center;text-decoration:underline;text-underline-offset:2px}
+.linkish:hover{color:var(--foreground)}
+
+/* ============ GENERIC BUTTONS / CARDS ============ */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;white-space:nowrap;border-radius:var(--r-md);font-size:.875rem;line-height:1.25rem;font-weight:500;height:2.25rem;padding:0 1rem;background:var(--primary);color:var(--primary-foreground);box-shadow:0 1px 2px rgb(0 0 0 / .08);transition:filter .15s}
+.btn:hover{filter:brightness(1.08)}
+.btn svg{width:1rem;height:1rem}
+.btn.ghost{background:transparent;color:var(--foreground);box-shadow:none}
+.btn.ghost:hover{background:var(--muted);filter:none}
+.btn.sm{height:2rem;padding:0 .75rem;font-size:.75rem}
+.btn .count{border-radius:4px;background:color-mix(in oklab, var(--primary-foreground) 15%, transparent);padding:0 .375rem;font-size:.75rem}
+.card{border-radius:var(--r-xl);border-width:1px;background:var(--card)}
+.shadow{box-shadow:var(--shadow-card)}
+.wrap{margin:0 auto;max-width:64rem;display:flex;flex-direction:column;gap:1rem}
+.empty-main{display:flex;height:100%;min-height:50vh;align-items:center;justify-content:center;text-align:center;color:var(--muted-foreground)}
+
+/* ============ APPLICANT VIEW ============ */
+.head{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem}
+.head-l{flex:1;min-width:0}
+.name-inp{width:100%;font-family:var(--font-display);font-size:1.875rem;line-height:2.25rem;font-weight:700}
+.chips{margin-top:.75rem;display:flex;flex-wrap:wrap;gap:.5rem}
+.chip{height:2rem;display:inline-flex;align-items:center;border-radius:999px;border-width:1px;padding:.25rem .75rem;font-size:.75rem;line-height:1rem;font-weight:500;background:var(--card);box-shadow:0 1px 2px rgb(0 0 0 / .05)}
+.chip:hover{background:var(--muted)}
+.chip.on{border-color:var(--primary);background:var(--primary);color:var(--primary-foreground)}
+.chip.best{border-color:var(--accent);background:var(--accent);color:var(--accent-foreground);font-weight:700}
+.chip.str{border-color:var(--success);background:var(--success);color:var(--success-foreground)}
+.chip.weak{border-color:var(--destructive);background:var(--destructive);color:var(--destructive-foreground)}
+.legacy{margin-top:.5rem;font-size:.75rem;color:var(--muted-foreground)}
+.scorecard{background-image:var(--gradient-hero);box-shadow:var(--shadow-card);border-radius:var(--r-xl);padding:.75rem 1.25rem;text-align:center;color:var(--primary-foreground)}
+.scorecard .big{font-family:var(--font-display);font-size:1.875rem;line-height:2.25rem;font-weight:700}
+.scorecard .big span{font-size:1rem;opacity:.7}
+.scorecard .sub{font-size:.75rem;opacity:.8}
+.bar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.75rem;padding:1rem}
+.bar h2{font-weight:600}
+.bar .hint{font-size:.75rem;color:var(--muted-foreground);font-weight:400}
+.dec{display:flex;gap:.5rem;flex-wrap:wrap}
+.dbtn{border-radius:999px;border-width:1px;padding:.375rem 1rem;font-size:.875rem;font-weight:600;background:var(--card);transition:background-color .15s,color .15s}
+.dbtn:hover{background:var(--muted)}
+.dbtn.accept{background:var(--success);color:var(--success-foreground);border-color:var(--success)}
+.dbtn.maybe{background:var(--warning);color:var(--warning-foreground);border-color:var(--warning)}
+.dbtn.reject{background:var(--destructive);color:var(--destructive-foreground);border-color:var(--destructive)}
+.timer{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
+.clock{font-family:var(--font-display);font-size:1.5rem;line-height:2rem;font-weight:700;font-variant-numeric:tabular-nums;min-width:5.5ch;text-align:right;display:inline-flex;align-items:center;gap:.5rem}
+.clock.running{color:var(--primary)}
+.traits{padding:1rem;display:flex;flex-direction:column;gap:.75rem}
+.traits h2{font-weight:600}
+.trow{display:flex;flex-wrap:wrap;align-items:center;gap:.375rem}
+.tlabel{width:100%;font-size:.6875rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--muted-foreground)}
+.addtrait{height:2rem;width:8.5rem;border-radius:999px;border-width:1px;border-style:dashed;background:var(--background);padding:0 .75rem;font-size:.75rem}
+details.notes{border-top-width:1px;border-bottom-width:1px;padding:.75rem 0}
+details.notes summary{cursor:pointer;font-size:.875rem;font-weight:600}
+details.notes textarea{margin-top:.75rem;width:100%;border-radius:var(--r-md);border-width:1px;background:var(--background);padding:.75rem;font-size:.875rem;line-height:1.25rem;resize:vertical}
+.qhead{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.75rem}
+.qhead h2{font-family:var(--font-display);font-size:1.125rem;line-height:1.75rem;font-weight:700}
+.qhead h2 span{font-size:.875rem;font-weight:400;color:var(--muted-foreground);font-family:var(--font-sans)}
+.qgrid{display:grid;grid-template-columns:1fr;align-items:start;gap:1rem}
+@media (min-width:1280px){.qgrid{grid-template-columns:1fr 1fr}}
+.sec{overflow:hidden;border-radius:var(--r-lg);border-width:1px;background:var(--card)}
+.sec-h{display:flex;align-items:center;justify-content:space-between;gap:.5rem;border-bottom-width:1px;padding:.75rem 1rem}
+.sec-h h2{font-weight:600}
+.pill{border-radius:999px;background:var(--accent);color:var(--accent-foreground);padding:.125rem .75rem;font-size:.875rem;font-weight:700;white-space:nowrap}
+.grp{background:var(--muted);padding:.375rem 1rem;font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.025em;color:var(--muted-foreground)}
+.qs>li{padding:1rem;display:flex;flex-direction:column;gap:.5rem}
+.qs>li+li{border-top-width:1px}
+.qrow{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.75rem}
+.qrow p{font-weight:500}
+.scores{display:flex;align-items:center;gap:.25rem}
+.sbtn{height:2rem;width:2rem;border-radius:var(--r-md);font-size:.875rem;font-weight:700;background:var(--secondary);color:var(--secondary-foreground);transition:background-color .15s}
+.sbtn:hover{background:var(--muted)}
+.sbtn.hi{background:var(--success);color:var(--success-foreground)}
+.sbtn.mid{background:var(--warning);color:var(--warning-foreground)}
+.sbtn.lo{background:var(--destructive);color:var(--destructive-foreground)}
+.rm{margin-left:.25rem;padding:0 .5rem;height:2rem;border-radius:var(--r-md);font-size:.75rem;color:var(--muted-foreground)}
+.rm:hover{background:var(--muted)}
+.qnote{width:100%;border-radius:var(--r-md);border-width:1px;background:var(--background);padding:.375rem .75rem;font-size:.875rem;line-height:1.25rem}
+.noq{border-top-width:1px;border-bottom-width:1px;padding:2rem 0;text-align:center;font-size:.875rem;color:var(--muted-foreground)}
+.del{align-self:flex-start;font-size:.875rem;color:var(--destructive)}
+.del:hover{text-decoration:underline}
+
+/* ============ RANKING ============ */
+.toprow{display:flex;align-items:center;justify-content:space-between;gap:1rem}
+.toprow h2{font-size:1.5rem;line-height:2rem;font-weight:700}
+.sel{border-radius:var(--r-md);border-width:1px;background:var(--card);padding:.375rem .75rem;font-size:.875rem}
+.tbl-wrap{overflow-x:auto;border-radius:var(--r-xl);border-width:1px;background:var(--card)}
+table{width:100%;font-size:.875rem;border-collapse:collapse}
+thead{background:var(--muted);text-align:left}
+th,td{padding:.75rem;vertical-align:top}
+th{font-weight:600;white-space:nowrap}
+tbody tr{border-top-width:1px;cursor:pointer}
+tbody tr:hover{background:var(--muted)}
+.dpill{display:inline-flex;align-items:center;border-radius:999px;padding:.125rem .625rem;font-size:.75rem;font-weight:600}
+.dpill.accept{background:var(--success);color:var(--success-foreground)}
+.dpill.maybe{background:var(--warning);color:var(--warning-foreground)}
+.dpill.reject{background:var(--destructive);color:var(--destructive-foreground)}
+.tags{margin-top:.25rem;font-size:.6875rem;line-height:1rem}
+.tags .s{color:var(--success)}.tags .w{color:var(--destructive)}
+.total{font-weight:700;color:var(--primary);white-space:nowrap}
+.xs{font-size:.75rem;color:var(--muted-foreground)}
+
+/* ============ QUESTION BANK ============ */
+.bank{margin:0 auto;max-width:56rem;display:flex;flex-direction:column;gap:1.5rem}
+.bank>h2{font-size:1.5rem;line-height:2rem;font-weight:700}
+.bank-sec{border-radius:var(--r-xl);border-width:1px;background:var(--card);padding:1rem}
+.bank-sec .sname{margin-bottom:.75rem;width:100%;font-family:var(--font-display);font-size:1.125rem;font-weight:700}
+.bank-sec ol{display:flex;flex-direction:column;gap:.5rem}
+.bank-sec li{display:flex;align-items:center;gap:.5rem}
+.bank-sec .n{width:1.5rem;font-size:.875rem;color:var(--muted-foreground)}
+.bank-sec select{border-radius:var(--r-md);border-width:1px;background:var(--background);padding:.375rem .5rem;font-size:.75rem}
+.bank-sec .qt{flex:1;min-width:0;border-radius:var(--r-md);border-width:1px;background:var(--background);padding:.375rem .75rem;font-size:.875rem}
+.bank-sec .x{padding:0 .5rem;color:var(--destructive)}
+.bank-btns{margin-top:.75rem;display:flex;gap:.5rem;flex-wrap:wrap}
+.sec-btn{border-radius:var(--r-md);background:var(--secondary);padding:.375rem .75rem;font-size:.875rem;font-weight:500}
+.sec-btn:hover{filter:brightness(.97)}
+.tchip{display:inline-flex;align-items:center;gap:.25rem;border-radius:999px;border-width:1px;background:var(--background);padding:.125rem .25rem .125rem .625rem;font-size:.75rem}
+.tchip button{color:var(--destructive);padding:0 .25rem}
+
+/* ============ CHOOSE-QUESTIONS DIALOG ============ */
+.overlay{position:fixed;inset:0;z-index:50;background:rgb(0 0 0 / .8)}
+.dialog{position:fixed;left:50%;top:50%;z-index:51;transform:translate(-50%,-50%);display:flex;flex-direction:column;gap:.75rem;height:92dvh;width:96vw;max-width:1500px;border-radius:var(--r-lg);border-width:1px;background:var(--background);padding:1rem;box-shadow:0 10px 30px rgb(0 0 0 / .25)}
+@media (min-width:640px){.dialog{padding:1.25rem}}
+.dialog.confirm{height:auto;width:calc(100vw - 2rem);max-width:26rem;gap:1.25rem;padding:1.25rem;z-index:52}
+.btn.danger{background:var(--destructive);color:var(--destructive-foreground)}
+.dialog .close{position:absolute;right:1rem;top:1rem;opacity:.7;border-radius:4px}
+.dialog .close:hover{opacity:1}
+.dialog h2{font-family:var(--font-display);font-size:1.25rem;font-weight:600;line-height:1;padding-right:2rem}
+.dialog .desc{margin-top:.25rem;font-size:.875rem;color:var(--muted-foreground)}
+.dtools{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem;border-bottom-width:1px;padding-bottom:.75rem}
+.dsearch{display:flex;min-width:10rem;flex:1;align-items:center;gap:.5rem;border-radius:var(--r-md);border-width:1px;background:var(--card);padding:0 .75rem}
+.dsearch svg{width:1rem;height:1rem;color:var(--muted-foreground)}
+.dsearch input{height:2.25rem;width:100%;min-width:0;font-size:.875rem}
+.dtools select{height:2.25rem;border-radius:var(--r-md);border-width:1px;background:var(--card);padding:0 .5rem;font-size:.875rem}
+.dbody{min-height:0;flex:1;overflow-y:auto}
+.dgrid{display:grid;grid-template-columns:1fr;gap:.75rem}
+@media (min-width:600px){.dgrid{grid-template-columns:repeat(3,1fr)}}
+@media (min-width:850px){.dgrid{grid-template-columns:repeat(6,1fr)}}
+.dcol{min-width:0}
+.dcol h3{margin-bottom:.5rem;display:flex;align-items:center;justify-content:space-between;gap:.5rem;border-bottom-width:1px;padding-bottom:.5rem;font-size:.875rem;font-weight:700}
+.dcol h3 span:last-child{font-size:.75rem;color:var(--primary)}
+.dlabel{margin-bottom:.375rem;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--muted-foreground)}
+.dgrp{margin-bottom:.75rem;display:flex;flex-direction:column;gap:.375rem}
+.qpick{display:flex;min-height:2.25rem;width:100%;align-items:flex-start;gap:.375rem;border-radius:var(--r-md);border-width:1px;background:var(--card);padding:.375rem .5rem;text-align:left;font-size:.75rem;line-height:1.375}
+.qpick:hover{background:var(--muted)}
+.qpick.on{border-color:var(--primary);background:color-mix(in oklab, var(--primary) 10%, transparent)}
+.qpick.on:hover{background:color-mix(in oklab, var(--primary) 15%, transparent)}
+.cbx{margin-top:.125rem;display:flex;height:1rem;width:1rem;flex-shrink:0;align-items:center;justify-content:center;border-radius:4px;border-width:1px;border-color:var(--border)}
+.qpick.on .cbx{border-color:var(--primary);background:var(--primary);color:var(--primary-foreground)}
+.cbx svg{width:.75rem;height:.75rem}
+.dfoot{display:flex;align-items:center;justify-content:space-between;border-top-width:1px;padding-top:.75rem}
+.dfoot span{font-size:.875rem;font-weight:600}
+
+/* ============ SIGN-IN / MESSAGES ============ */
+.gate{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1rem}
+.gate .box{width:100%;max-width:24rem;overflow:hidden;border-radius:var(--r-xl);border-width:1px;background:var(--card);box-shadow:var(--shadow-card)}
+.gate .box .hero{padding:1.25rem}
+.gate .box .body{padding:1.25rem;display:flex;flex-direction:column;gap:.75rem;font-size:.875rem}
+.err{color:var(--destructive);font-size:.875rem}
+.toast{position:fixed;left:50%;bottom:1.25rem;transform:translateX(-50%);z-index:60;background:var(--foreground);color:var(--background);border-radius:var(--r-md);padding:.5rem 1rem;font-size:.875rem;box-shadow:0 6px 20px rgb(0 0 0 / .2);max-width:calc(100vw - 2rem)}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="toast"></div>
+<input type="file" id="csvfile" accept=".csv,text/csv" hidden>
+
+<script>
+// =====================================================================
+//  STEP 1 — PASTE YOUR FIREBASE CONFIG HERE  (guide: Part 2, Step 8)
+//  Replace this whole block with the one Firebase gives you.
+//  While it still says PASTE_HERE, the board runs in "preview mode":
+//  everything works, but it only saves on this one laptop.
+// =====================================================================
+const firebaseConfig = {
+  apiKey: "PASTE_HERE",
+  authDomain: "PASTE_HERE",
+  databaseURL: "PASTE_HERE",
+  projectId: "PASTE_HERE",
+  storageBucket: "PASTE_HERE",
+  messagingSenderId: "PASTE_HERE",
+  appId: "PASTE_HERE"
+};
+// =====================================================================
+
+// ---------- Settings you can change ----------
+const MAX = 5; // each question is scored 0–5
+const COMMITTEES = [
+  ["coordination", "Coordination"],
+  ["reception", "Reception and catering"],
+  ["multimedia", "Multimedia and Marketing"],
+  ["pr", "PR"],
+  ["admins", "Admins and Busses"],
+];
+const STRENGTHS = ["Confident", "Leader", "Organised", "Creative", "Good communicator", "Team player", "Calm under pressure", "Committed", "Problem solver", "Proactive", "Experienced", "Well-prepared"];
+const WEAKNESSES = ["Needs work", "Shy / quiet", "Unprepared", "Vague answers", "Rambles", "Overpromises", "Low commitment", "Inexperienced", "Poor time management", "Not a team player"];
+
+// =====================================================================
+//  Everything below is the app itself.
+// =====================================================================
+const CONFIGURED = !!firebaseConfig.apiKey && !firebaseConfig.apiKey.startsWith("PASTE");
+const LOCAL_KEY = "interview-board-live-v1";
+
+const ICON = {
+  list: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/><path d="M13 6h8"/><path d="M13 12h8"/><path d="M13 18h8"/></svg>',
+  search: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>',
+  check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>',
+  x: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>',
+  play: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5Z"/></svg>',
+  pause: '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>',
+  reset: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>',
+};
+
+// ---------- small helpers ----------
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const uid = () => Math.random().toString(36).slice(2, 10);
+const byOrder = (a, b) => (a.order ?? 0) - (b.order ?? 0);
+let serverOffset = 0;
+const now = () => Date.now() + serverOffset;
+const fmt = ms => {
+  const s = Math.floor(ms / 1000), h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), x = s % 60;
+  const p = n => String(n).padStart(2, "0");
+  return h ? `${h}:${p(m)}:${p(x)}` : `${p(m)}:${p(x)}`;
+};
+
+// ---------- app state ----------
+let board = null;     // the shared data (from Firebase or this laptop)
+let secs = [];        // sections sorted, each with its questions sorted
+const ui = {          // things that are only for THIS laptop
+  view: "applicant", sel: null, newName: "", search: "",
+  modal: false, qsearch: "", qtype: "all", rank: "all", notesOpen: true,
+  conn: CONFIGURED ? "connecting" : "local", people: [],
+  screen: CONFIGURED ? "loading" : "app", user: null, error: "",
+  newtrait: { strengths: "", weaknesses: "" }, banktrait: { strengths: "", weaknesses: "" },
+};
+let store = null;     // { update(map) } — writes to Firebase or to this laptop
+
+// ---------- reading the data ----------
+function setBoard(raw) {
+  raw = raw || {};
+  board = {
+    sections: raw.sections || {},
+    applicants: raw.applicants || {},
+    traits: { strengths: raw.traits?.strengths || {}, weaknesses: raw.traits?.weaknesses || {} },
+  };
+  secs = Object.entries(board.sections).map(([id, s]) => ({
+    id, name: s.name || "", order: s.order ?? 0,
+    questions: Object.entries(s.questions || {}).map(([qid, q]) => ({ id: qid, text: q.text || "", kind: q.kind || "question", order: q.order ?? 0 })).sort(byOrder),
+  })).sort(byOrder);
+  render();
+}
+const apps = () => Object.entries(board.applicants).map(([id, a]) => ({ id, ...a })).sort((a, b) => (a.createdAt ?? 0) - (b.createdAt ?? 0));
+const getApp = id => (id && board.applicants[id] ? { id, ...board.applicants[id] } : null);
+const committees = () => secs.filter(s => s.id !== "general");
+const traitList = kind => Object.entries(board.traits[kind]).map(([id, t]) => ({ id, label: t.label, order: t.order ?? 0 })).sort(byOrder);
+const decision = a => a.decision || "pending";
+const DECISIONS = [["accept", "Accept"], ["maybe", "Maybe"], ["reject", "Reject"]];
+
+const applied = (a, s) => s.id === "general" || !!(a.committees || {})[s.id];
+const isPicked = (a, qid) => !a.custom || !!(a.picked || {})[qid];
+const askedIn = (a, s) => s.questions.filter(q => isPicked(a, q.id));
+const sectionGot = (a, s) => askedIn(a, s).reduce((t, q) => t + ((a.scores || {})[q.id] ?? 0), 0);
+function total(a) {
+  let got = 0, max = 0;
+  for (const s of secs) {
+    if (!applied(a, s)) continue;
+    const qs = askedIn(a, s);
+    max += qs.length * MAX;
+    got += qs.reduce((t, q) => t + ((a.scores || {})[q.id] ?? 0), 0);
+  }
+  if (a.legacy) { got += +a.legacy.got || 0; max += +a.legacy.max || 0; }
+  return { got, max, pct: max ? Math.round((got / max) * 100) : 0 };
+}
+const selectedCount = a => secs.filter(s => applied(a, s)).reduce((t, s) => t + askedIn(a, s).length, 0);
+function elapsed(a) {
+  const t = a.timer || {};
+  return (t.elapsed || 0) + (t.since ? Math.max(0, now() - t.since) : 0);
+}
+
+// ---------- writing the data ----------
+// Every change is a list of { "path/to/thing": newValue }. null = delete.
+const A = id => `applicants/${id}`;
+const write = map => store.update(map);
+
+function addApplicant() {
+  const name = ui.newName.trim();
+  if (!name) return;
+  const id = uid();
+  write({ [A(id)]: { name, notes: "", custom: true, createdAt: now() } });
+  ui.sel = id; ui.view = "applicant"; ui.newName = "";
+  render();
+}
+function togglePick(a, s, qid) {
+  const on = applied(a, s) && isPicked(a, qid);
+  const up = {};
+  if (!a.custom) {
+    const cur = {};
+    secs.filter(x => applied(a, x)).forEach(x => x.questions.forEach(q => (cur[q.id] = true)));
+    if (on) delete cur[qid]; else cur[qid] = true;
+    up[`${A(a.id)}/custom`] = true;
+    up[`${A(a.id)}/picked`] = Object.keys(cur).length ? cur : null;
+  } else {
+    up[`${A(a.id)}/picked/${qid}`] = on ? null : true;
+  }
+  if (on) up[`${A(a.id)}/scores/${qid}`] = null;
+  else if (!applied(a, s)) up[`${A(a.id)}/committees/${s.id}`] = true;
+  write(up);
+}
+function removeQuestion(a, qid) {
+  const up = { [`${A(a.id)}/scores/${qid}`]: null };
+  if (a.custom) up[`${A(a.id)}/picked/${qid}`] = null;
+  else {
+    const cur = {};
+    secs.filter(x => applied(a, x)).forEach(x => x.questions.forEach(q => q.id !== qid && (cur[q.id] = true)));
+    up[`${A(a.id)}/custom`] = true;
+    up[`${A(a.id)}/picked`] = Object.keys(cur).length ? cur : null;
+  }
+  write(up);
+}
+function startTimer(a) {
+  const up = {};
+  // only one interview at a time: pause any other running timer
+  for (const b of apps()) if (b.id !== a.id && b.timer?.since) up[`${A(b.id)}/timer`] = { elapsed: elapsed(b) };
+  up[`${A(a.id)}/timer`] = { elapsed: a.timer?.elapsed || 0, since: now() };
+  write(up);
+}
+function addTrait(kind, label, applicantId) {
+  label = label.trim();
+  if (!label) return;
+  const existing = traitList(kind).find(t => t.label.toLowerCase() === label.toLowerCase());
+  const tid = existing ? existing.id : uid();
+  const up = {};
+  if (!existing) up[`traits/${kind}/${tid}`] = { label, order: Date.now() };
+  if (applicantId) up[`${A(applicantId)}/${kind}/${tid}`] = true;
+  write(up);
+}
+
+// ---------- default board (used the very first time) ----------
+function defaultBoard() {
+  const up = {};
+  const mk = (sid, name, order, qs) => {
+    const questions = {};
+    qs.forEach(([text, kind], i) => (questions[uid()] = { text, kind: kind || "question", order: i }));
+    up[`sections/${sid}`] = { name, order, questions };
+  };
+  mk("general", "General", 0, [["Tell us about yourself."], ["Why do you want to join?"], ["How do you handle pressure and deadlines?"]]);
+  COMMITTEES.forEach(([sid, name], i) => mk(sid, name, i + 1, [[`${name} question 1`], [`${name} question 2`], [`${name} scenario 1`, "scenario"], [`${name} scenario 2`, "scenario"]]));
+  STRENGTHS.forEach((label, i) => (up[`traits/strengths/s${i}`] = { label, order: i }));
+  WEAKNESSES.forEach((label, i) => (up[`traits/weaknesses/w${i}`] = { label, order: i }));
+  return up;
+}
+
+// ---------- CSV import / export ----------
+function parseCSV(text) {
+  text = text.replace(/^﻿/, "");
+  const rows = []; let row = [], f = "", q = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (q) {
+      if (c === '"') { if (text[i + 1] === '"') { f += '"'; i++; } else q = false; }
+      else f += c;
+    } else if (c === '"') q = true;
+    else if (c === ",") { row.push(f); f = ""; }
+    else if (c === "\n" || c === "\r") { if (c === "\r" && text[i + 1] === "\n") i++; row.push(f); rows.push(row); row = []; f = ""; }
+    else f += c;
+  }
+  if (f !== "" || row.length) { row.push(f); rows.push(row); }
+  return rows.filter(r => r.some(x => x.trim() !== ""));
+}
+function importCSV(text) {
+  const rows = parseCSV(text);
+  if (rows.length < 2) return toast("That file has no applicants in it.");
+  const head = rows[0].map(h => h.trim().toLowerCase());
+  const col = name => head.indexOf(name.toLowerCase());
+  const cell = (r, name) => (col(name) >= 0 ? (r[col(name)] ?? "").trim() : "");
+  if (col("name") < 0) return toast("Couldn't find a “Name” column in that file.");
+  const secByName = n => secs.find(s => s.name.trim().toLowerCase() === n.trim().toLowerCase());
+  const have = new Set(apps().map(a => a.name.trim().toLowerCase()));
+  const traitByLabel = (kind, label) => traitList(kind).find(t => t.label.toLowerCase() === label.toLowerCase());
+  const up = {}; let added = 0, skipped = 0; const t0 = now();
+  rows.slice(1).forEach((r, i) => {
+    const name = cell(r, "name");
+    if (!name) return;
+    if (have.has(name.toLowerCase())) { skipped++; return; }
+    have.add(name.toLowerCase());
+    const a = { name, notes: cell(r, "notes"), custom: true, createdAt: t0 + i };
+    const d = cell(r, "decision").toLowerCase();
+    if (["accept", "maybe", "reject"].includes(d)) a.decision = d;
+    const cm = {};
+    cell(r, "committees").split("/").map(x => x.trim()).filter(Boolean).forEach(n => { const s = secByName(n); if (s && s.id !== "general") cm[s.id] = true; });
+    if (Object.keys(cm).length) a.committees = cm;
+    const best = secByName(cell(r, "best fit") || "-");
+    if (best && best.id !== "general") a.best = best.id;
+    // the old board's scores (we only have the totals, not each question)
+    const got = +cell(r, "score") || 0, max = +cell(r, "max") || 0;
+    const legacySecs = {};
+    secs.forEach(s => { const v = +cell(r, s.name.trim()) || 0; if (v) legacySecs[s.id] = v; });
+    if (got || max) a.legacy = { got, max, ...(Object.keys(legacySecs).length ? { sections: legacySecs } : {}) };
+    ["strengths", "weaknesses"].forEach(kind => {
+      const labels = cell(r, kind).split(",").map(x => x.trim()).filter(Boolean);
+      labels.forEach(l => { const t = traitByLabel(kind, l); if (t) (a[kind] ||= {})[t.id] = true; });
+    });
+    up[A(uid())] = a; added++;
+  });
+  if (added) write(up);
+  toast(`Imported ${added} applicant${added === 1 ? "" : "s"}` + (skipped ? ` · skipped ${skipped} already on the board` : ""));
+}
+function exportCSV() {
+  const cs = committees();
+  const rows = [["Name", "Decision", "Committees", "Score", "Max", "%", ...secs.map(s => s.name), "Best fit", "Interview time", "Strengths", "Weaknesses", "Notes"]];
+  apps().forEach(a => {
+    const t = total(a);
+    const labels = kind => traitList(kind).filter(x => (a[kind] || {})[x.id]).map(x => x.label).join(", ");
+    rows.push([
+      a.name, decision(a), cs.filter(s => applied(a, s)).map(s => s.name).join(" / "),
+      String(t.got), String(t.max), String(t.pct),
+      ...secs.map(s => String(sectionGot(a, s) + (a.legacy?.sections?.[s.id] || 0))),
+      cs.find(s => s.id === a.best)?.name || "", elapsed(a) ? fmt(elapsed(a)) : "",
+      labels("strengths"), labels("weaknesses"), a.notes || "",
+    ]);
+  });
+  const csv = "﻿" + rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(",")).join("\n");
+  const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+  const link = document.createElement("a");
+  link.href = url; link.download = "interviews.csv"; link.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+let toastTimer;
+function toast(msg) {
+  const el = document.getElementById("toast");
+  el.innerHTML = `<div class="toast">${esc(msg)}</div>`;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => (el.innerHTML = ""), 4000);
+}
+
+// =====================================================================
+//  DRAWING THE SCREEN
+// =====================================================================
+function liveBadge() {
+  if (ui.conn === "local") return `<span class="live local"><i></i>Preview mode · saves on this laptop only</span>`;
+  if (ui.conn === "offline") return `<span class="live off"><i></i>Offline · changes sync when you reconnect</span>`;
+  if (ui.conn === "connecting") return `<span class="live off"><i></i>Connecting…</span>`;
+  const names = ui.people.length ? ui.people.join(" + ") : "1 laptop";
+  return `<span class="live"><i></i>Live · ${esc(names)}</span>`;
+}
+
+function sidebarHTML() {
+  const list = apps();
+  const shown = list.filter(a => a.name.toLowerCase().includes(ui.search.toLowerCase()));
+  const count = d => list.filter(a => decision(a) === d).length;
+  return `
+  <div class="hero">
+    <h1>Interview Board</h1>
+    <p>${list.length} applicants · ${count("accept")} accepted · ${count("reject")} rejected</p>
+    ${liveBadge()}
+  </div>
+  <div class="tabs">
+    ${["applicant", "ranking", "questions"].map(v => `<button class="tab ${ui.view === v ? "on" : ""}" data-act="view" data-v="${v}">${v === "applicant" ? "Interview" : v[0].toUpperCase() + v.slice(1)}</button>`).join("")}
+  </div>
+  <div class="side-inputs">
+    <div class="row">
+      <input class="inp" data-bind="newName" placeholder="New applicant name" aria-label="New applicant name">
+      <button class="plus" data-act="add" aria-label="Add applicant">+</button>
+    </div>
+    <input class="inp" data-bind="search" placeholder="Search…" aria-label="Search applicants">
+  </div>
+  <ul class="list" data-scroll="list">
+    ${shown.map(a => {
+      const t = total(a), d = decision(a);
+      const on = ui.sel === a.id && ui.view === "applicant";
+      return `<li><button class="li ${on ? "on" : ""}" data-act="pick" data-id="${a.id}">
+        <span class="nm">${d !== "pending" ? `<span class="dot bg-${d}"></span>` : ""}<span>${esc(a.name)}</span></span>
+        <span class="pc">${a.timer?.since ? `<span class="rec" title="Timer running"></span>` : ""}${t.pct}%</span>
+      </button></li>`;
+    }).join("")}
+  </ul>
+  <div class="side-foot">
+    <button class="btn-outline" data-act="export">Export to Excel (CSV)</button>
+    <button class="linkish" data-act="import">Import applicants from CSV</button>
+    ${ui.user ? `<button class="linkish" data-act="signout">Signed in as ${esc(ui.user.email)} · Sign out</button>` : ""}
+  </div>`;
+}
+
+function applicantHTML(a) {
+  const t = total(a), cs = committees();
+  const shownSecs = secs.filter(s => applied(a, s)).map(s => ({ ...s, questions: askedIn(a, s) })).filter(s => s.questions.length);
+  const nSel = shownSecs.reduce((n, s) => n + s.questions.length, 0);
+  const running = !!a.timer?.since, ms = elapsed(a);
+  const legacy = a.legacy ? `<p class="legacy">Imported from the old board: ${a.legacy.got}/${a.legacy.max}${a.legacy.sections ? " · " + Object.entries(a.legacy.sections).map(([sid, v]) => `${esc(secs.find(s => s.id === sid)?.name || sid)} ${v}`).join(" · ") : ""} (already counted in the total)</p>` : "";
+  const traitRow = (kind, cls, label) => `
+    <div class="trow">
+      <span class="tlabel">${label}</span>
+      ${traitList(kind).map(tr => { const on = !!(a[kind] || {})[tr.id]; return `<button class="chip ${on ? cls : ""}" data-act="trait" data-kind="${kind}" data-tid="${tr.id}" aria-pressed="${on}">${on ? "✓ " : ""}${esc(tr.label)}</button>`; }).join("")}
+      <input class="addtrait" data-bind="newtrait:${kind}" placeholder="+ add word" aria-label="Add a ${kind === "strengths" ? "strength" : "weakness"} word">
+    </div>`;
+
+  return `
+  <div class="wrap">
+    <div class="head">
+      <div class="head-l">
+        <input class="name-inp" data-bind="name:${a.id}" aria-label="Applicant name">
+        <div class="chips">
+          ${cs.map(s => { const on = applied(a, s); return `<button class="chip ${on ? "on" : ""}" data-act="committee" data-sid="${s.id}">${on ? "✓ " : "+ "}${esc(s.name)}</button>`; }).join("")}
+        </div>
+        ${legacy}
+      </div>
+      <div class="scorecard">
+        <div class="big">${t.got}<span>/${t.max}</span></div>
+        <div class="sub">${t.pct}% total</div>
+      </div>
+    </div>
+
+    <section class="card shadow bar">
+      <h2>Interview timer <span class="hint">· ${running ? "recording" : ms ? "paused" : "not started"}</span></h2>
+      <div class="timer">
+        <span class="clock ${running ? "running" : ""}">${running ? `<span class="rec"></span>` : ""}<span data-timer="${a.id}">${fmt(ms)}</span></span>
+        ${running
+          ? `<button class="btn" data-act="pause">${ICON.pause}Pause</button>`
+          : `<button class="btn" data-act="start">${ICON.play}${ms ? "Resume" : "Start"}</button>`}
+        ${ms ? `<button class="btn ghost" data-act="reset" aria-label="Reset timer">${ICON.reset}Reset</button>` : ""}
+      </div>
+    </section>
+
+    <section class="card shadow bar">
+      <h2>Final decision</h2>
+      <div class="dec">
+        ${DECISIONS.map(([id, label]) => `<button class="dbtn ${decision(a) === id ? id : ""}" data-act="decision" data-d="${id}">${label}</button>`).join("")}
+      </div>
+    </section>
+
+    <section class="card bar">
+      <h2>Best fit committee <span class="hint">· where you'd actually place them</span></h2>
+      <div class="dec">
+        ${cs.map(s => { const on = a.best === s.id; return `<button class="chip ${on ? "best" : ""}" data-act="best" data-sid="${s.id}" aria-pressed="${on}">${on ? "★ " : ""}${esc(s.name)}</button>`; }).join("")}
+      </div>
+    </section>
+
+    <section class="card traits">
+      <h2>Strengths &amp; weaknesses</h2>
+      ${traitRow("strengths", "str", "Strengths")}
+      ${traitRow("weaknesses", "weak", "Weaknesses")}
+    </section>
+
+    <details class="notes" ${ui.notesOpen ? "open" : ""}>
+      <summary>Applicant notes ${a.notes ? "· Added" : ""}</summary>
+      <textarea data-bind="notes:${a.id}" rows="3" placeholder="Impressions, strengths, concerns…" aria-label="Applicant notes"></textarea>
+    </details>
+
+    <div class="qhead">
+      <h2>Interview questions <span>· ${nSel} selected</span></h2>
+      <button class="btn" data-act="openq">${ICON.list}Choose questions <span class="count">${selectedCount(a)}</span></button>
+    </div>
+
+    <div class="qgrid">
+      ${shownSecs.map(s => {
+        const groups = s.id === "general" ? [["", s.questions]] : [["Committee questions", s.questions.filter(q => q.kind === "question")], ["Scenarios", s.questions.filter(q => q.kind === "scenario")]];
+        const got = s.questions.reduce((n, q) => n + ((a.scores || {})[q.id] ?? 0), 0);
+        return `<section class="sec">
+          <div class="sec-h"><h2>${esc(s.name)}</h2><span class="pill">${got}/${s.questions.length * MAX} · ${s.questions.length} asked</span></div>
+          ${groups.filter(g => g[1].length).map(([label, qs]) => `
+            ${label ? `<p class="grp">${label}</p>` : ""}
+            <ol class="qs">
+              ${qs.map((q, i) => {
+                const sc = (a.scores || {})[q.id];
+                return `<li>
+                  <div class="qrow">
+                    <p>${i + 1}. ${esc(q.text)}</p>
+                    <div class="scores">
+                      ${Array.from({ length: MAX + 1 }, (_, n) => { const on = sc === n; const c = n >= 4 ? "hi" : n === 3 ? "mid" : "lo"; return `<button class="sbtn ${on ? c : ""}" data-act="score" data-q="${q.id}" data-n="${n}" aria-pressed="${on}" aria-label="${esc(q.text)}: ${n} points">${n}</button>`; }).join("")}
+                      <button class="rm" data-act="rmq" data-q="${q.id}">Remove</button>
+                    </div>
+                  </div>
+                  <input class="qnote" data-bind="qnote:${a.id}:${q.id}" placeholder="Note on this answer…" aria-label="Note on this answer">
+                </li>`;
+              }).join("")}
+            </ol>`).join("")}
+        </section>`;
+      }).join("")}
+    </div>
+    ${nSel === 0 ? `<div class="noq">No questions selected for ${esc(a.name)}.</div>` : ""}
+    <button class="del" data-act="delete">Delete applicant</button>
+  </div>`;
+}
+
+function rankingHTML() {
+  const cs = committees();
+  const rows = apps().filter(a => ui.rank === "all" || applied(a, { id: ui.rank }) || a.best === ui.rank)
+    .map(a => ({ a, t: total(a) })).sort((x, y) => y.t.pct - x.t.pct || y.t.got - x.t.got);
+  const labels = (a, kind) => traitList(kind).filter(x => (a[kind] || {})[x.id]).map(x => esc(x.label)).join(" · ");
+  return `
+  <div class="wrap">
+    <div class="toprow">
+      <h2>Ranking</h2>
+      <select class="sel" data-act="rankfilter" aria-label="Filter by committee">
+        <option value="all">All committees</option>
+        ${cs.map(s => `<option value="${s.id}" ${ui.rank === s.id ? "selected" : ""}>${esc(s.name)}</option>`).join("")}
+      </select>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>#</th><th>Name</th><th>Decision</th><th>Committees</th><th>Best fit</th><th>Time</th>${secs.map(s => `<th>${esc(s.name)}</th>`).join("")}<th>Total</th></tr></thead>
+        <tbody>
+          ${rows.map(({ a, t }, i) => {
+            const d = decision(a), str = labels(a, "strengths"), wk = labels(a, "weaknesses");
+            return `<tr data-act="pick" data-id="${a.id}">
+              <td style="font-weight:700">${i + 1}</td>
+              <td style="min-width:9rem"><div style="font-weight:500">${esc(a.name)}</div>${str || wk ? `<div class="tags">${str ? `<span class="s">${str}</span>` : ""}${str && wk ? "<br>" : ""}${wk ? `<span class="w">${wk}</span>` : ""}</div>` : ""}</td>
+              <td>${d !== "pending" ? `<span class="dpill ${d}">${DECISIONS.find(x => x[0] === d)[1]}</span>` : `<span class="xs">—</span>`}</td>
+              <td class="xs">${cs.filter(s => applied(a, s)).map(s => esc(s.name)).join(", ") || "—"}</td>
+              <td class="xs">${a.best ? "★ " + esc(cs.find(s => s.id === a.best)?.name || "") : "—"}</td>
+              <td class="xs" style="font-variant-numeric:tabular-nums">${elapsed(a) ? `<span data-timer="${a.id}">${fmt(elapsed(a))}</span>` : "—"}</td>
+              ${secs.map(s => { const leg = a.legacy?.sections?.[s.id] || 0; return `<td>${applied(a, s) || leg ? sectionGot(a, s) + leg : "—"}</td>`; }).join("")}
+              <td class="total">${t.got}/${t.max} (${t.pct}%)</td>
+            </tr>`;
+          }).join("")}
+          ${rows.length ? "" : `<tr><td colspan="99" style="padding:1.5rem;text-align:center" class="muted">No applicants yet.</td></tr>`}
+        </tbody>
+      </table>
+    </div>
+  </div>`;
+}
+
+function questionsHTML() {
+  const traitBank = (kind, title) => `
+    <div style="margin-bottom:.75rem">
+      <p class="tlabel" style="margin-bottom:.5rem">${title}</p>
+      <div class="trow">
+        ${traitList(kind).map(t => `<span class="tchip">${esc(t.label)}<button data-act="deltrait" data-kind="${kind}" data-tid="${t.id}" aria-label="Remove ${esc(t.label)}">✕</button></span>`).join("")}
+        <input class="addtrait" data-bind="banktrait:${kind}" placeholder="+ add word" aria-label="Add word">
+      </div>
+    </div>`;
+  return `
+  <div class="bank">
+    <h2>Question bank</h2>
+    <p class="muted" style="font-size:.875rem;margin-top:-1rem">Rename committees and edit questions. Each question is scored 0–${MAX}.</p>
+    ${secs.map(s => `
+      <section class="bank-sec">
+        <input class="sname" data-bind="sname:${s.id}" ${s.id === "general" ? "disabled" : ""} aria-label="Section name">
+        <ol>
+          ${s.questions.map((q, i) => `
+            <li>
+              <span class="n">${i + 1}.</span>
+              ${s.id !== "general" ? `<select data-act="qkind" data-sid="${s.id}" data-q="${q.id}" aria-label="Question type"><option value="question" ${q.kind === "question" ? "selected" : ""}>Question</option><option value="scenario" ${q.kind === "scenario" ? "selected" : ""}>Scenario</option></select>` : ""}
+              <input class="qt" data-bind="qtext:${s.id}:${q.id}" aria-label="Question text">
+              <button class="x" data-act="delq" data-sid="${s.id}" data-q="${q.id}" aria-label="Delete question">✕</button>
+            </li>`).join("")}
+        </ol>
+        <div class="bank-btns">
+          <button class="sec-btn" data-act="addq" data-sid="${s.id}" data-kind="question">+ Add question</button>
+          ${s.id !== "general" ? `<button class="sec-btn" data-act="addq" data-sid="${s.id}" data-kind="scenario">+ Add scenario</button>` : ""}
+        </div>
+      </section>`).join("")}
+    <section class="bank-sec">
+      <p class="sname" style="margin-bottom:.25rem">Strengths &amp; weakness words</p>
+      <p class="muted" style="font-size:.875rem;margin-bottom:1rem">The words you can tick for each applicant.</p>
+      ${traitBank("strengths", "Strengths")}
+      ${traitBank("weaknesses", "Weaknesses")}
+    </section>
+  </div>`;
+}
+
+// In-page "are you sure?" box (pop-up confirm() boxes are blocked in some places)
+function ask(message, yesLabel, run) { ui.confirm = { message, yesLabel, run }; render(); }
+function confirmHTML() {
+  if (!ui.confirm) return "";
+  return `<div class="overlay" data-act="confirm-no"></div>
+  <div class="dialog confirm" role="alertdialog" aria-modal="true">
+    <p>${esc(ui.confirm.message)}</p>
+    <div class="dec" style="justify-content:flex-end">
+      <button class="btn ghost" data-act="confirm-no">Cancel</button>
+      <button class="btn danger" data-act="confirm-yes">${esc(ui.confirm.yesLabel)}</button>
+    </div>
+  </div>`;
+}
+
+function modalHTML() {
+  if (ui.confirm) return confirmHTML();
+  const a = getApp(ui.sel);
+  if (!ui.modal || !a || ui.view !== "applicant") return "";
+  const u = selectedCount(a);
+  const totalQ = secs.reduce((n, s) => n + s.questions.length, 0);
+  const qs = ui.qsearch.toLowerCase();
+  return `
+  <div class="overlay" data-act="closeq"></div>
+  <div class="dialog" role="dialog" aria-modal="true" aria-label="Questions for ${esc(a.name)}">
+    <div>
+      <h2>Questions for ${esc(a.name)}</h2>
+      <p class="desc">${u} selected · ${totalQ} in question bank</p>
+    </div>
+    <div class="dtools">
+      <label class="dsearch">${ICON.search}<input data-bind="qsearch" placeholder="Search questions…" aria-label="Search questions"></label>
+      <select data-act="qtype" aria-label="Question type">
+        <option value="all" ${ui.qtype === "all" ? "selected" : ""}>All types</option>
+        <option value="question" ${ui.qtype === "question" ? "selected" : ""}>Questions</option>
+        <option value="scenario" ${ui.qtype === "scenario" ? "selected" : ""}>Scenarios</option>
+      </select>
+      <button class="btn ghost sm" data-act="clearq">Clear selections</button>
+    </div>
+    <div class="dbody" data-scroll="dialog">
+      <div class="dgrid">
+        ${secs.map(s => {
+          const match = s.questions.filter(q => q.text.toLowerCase().includes(qs) && (ui.qtype === "all" || q.kind === ui.qtype));
+          const n = applied(a, s) ? askedIn(a, s).length : 0;
+          const kinds = s.id === "general" ? ["question"] : ["question", "scenario"];
+          return `<section class="dcol">
+            <h3><span>${esc(s.name)}</span><span>${n}</span></h3>
+            ${kinds.map(k => {
+              const list = match.filter(q => q.kind === k);
+              if (!list.length) return "";
+              return `<div class="dgrp">
+                <p class="dlabel">${k === "scenario" ? "Scenarios" : s.id === "general" ? "General questions" : "Committee questions"}</p>
+                ${list.map(q => { const on = applied(a, s) && isPicked(a, q.id); return `<button class="qpick ${on ? "on" : ""}" data-act="toggleq" data-sid="${s.id}" data-q="${q.id}" aria-pressed="${on}"><span class="cbx">${on ? ICON.check : ""}</span><span>${esc(q.text)}</span></button>`; }).join("")}
+              </div>`;
+            }).join("")}
+            ${match.length ? "" : `<p class="xs">No matching questions</p>`}
+          </section>`;
+        }).join("")}
+      </div>
+    </div>
+    <div class="dfoot">
+      <span>${u} selected</span>
+      <button class="btn" data-act="closeq">${ICON.check}Done</button>
+    </div>
+    <button class="close" data-act="closeq" aria-label="Close">${ICON.x}</button>
+  </div>`;
+}
+
+function gateHTML() {
+  const body = {
+    loading: `<p class="muted">Loading…</p>`,
+    signin: `<p>Sign in with the Google account that's allowed to use this board.</p>
+             <button class="btn" data-act="signin">Sign in with Google</button>`,
+    denied: `<p>You're signed in as <b>${esc(ui.user?.email)}</b>, but this account isn't on the allowed list.</p>
+             <p class="muted">Ask the board owner to add this email to the Firebase database rules (guide: Part 3).</p>
+             <button class="btn ghost" data-act="signout">Sign out</button>`,
+    config: `<p class="err">${esc(ui.error)}</p><p class="muted">Check the firebaseConfig block at the top of index.html (guide: Part 2).</p>`,
+  }[ui.screen] || "";
+  return `<div class="gate"><div class="box"><div class="hero"><h1>Interview Board</h1><p>All applicants, questions, scores and notes in one place.</p></div><div class="body">${ui.screen === "signin" && ui.error ? `<p class="err">${esc(ui.error)}</p>` : ""}${body}</div></div></div>`;
+}
+
+// ---------- putting HTML on the page without losing your cursor ----------
+function patch(el, html) {
+  if (el.__html === html) return;
+  const ae = document.activeElement;
+  let focus = null;
+  if (ae && el.contains(ae) && ae.dataset.bind) focus = { k: ae.dataset.bind, v: ae.value, s: ae.selectionStart, e: ae.selectionEnd };
+  const scrolls = {};
+  el.querySelectorAll("[data-scroll]").forEach(n => (scrolls[n.dataset.scroll] = n.scrollTop));
+  el.innerHTML = html;
+  el.__html = html;
+  el.querySelectorAll("[data-scroll]").forEach(n => { if (scrolls[n.dataset.scroll] != null) n.scrollTop = scrolls[n.dataset.scroll]; });
+  if (focus) {
+    const n = el.querySelector(`[data-bind="${CSS.escape(focus.k)}"]`);
+    if (n) { n.value = focus.v; n.focus(); try { n.setSelectionRange(focus.s, focus.e); } catch {} }
+  }
+}
+function bindValue(k) {
+  const [type, x, y] = k.split(":");
+  const a = board?.applicants?.[x];
+  switch (type) {
+    case "newName": return ui.newName;
+    case "search": return ui.search;
+    case "qsearch": return ui.qsearch;
+    case "newtrait": return ui.newtrait[x];
+    case "banktrait": return ui.banktrait[x];
+    case "name": return a?.name ?? "";
+    case "notes": return a?.notes ?? "";
+    case "qnote": return a?.qnotes?.[y] ?? "";
+    case "sname": return board.sections[x]?.name ?? "";
+    case "qtext": return board.sections[x]?.questions?.[y]?.text ?? "";
+  }
+  return "";
+}
+function fillValues() {
+  document.querySelectorAll("[data-bind]").forEach(n => {
+    if (n === document.activeElement) return; // never overwrite what you're typing
+    const v = bindValue(n.dataset.bind);
+    if (n.value !== v) n.value = v;
+  });
+}
+
+const root = document.getElementById("app");
+function render() {
+  if (ui.screen !== "app" || !board) {
+    root.__shell = false;
+    patch(root, gateHTML());
+    return;
+  }
+  if (!root.__shell) {
+    root.__html = null;
+    root.innerHTML = `<div class="app"><aside class="side" id="side"></aside><main class="main" id="main"></main></div><div id="modal"></div>`;
+    root.__shell = true;
+  }
+  if (ui.sel && !board.applicants[ui.sel]) ui.sel = null;
+  const a = getApp(ui.sel);
+  patch(document.getElementById("side"), sidebarHTML());
+  patch(document.getElementById("main"),
+    ui.view === "questions" ? questionsHTML()
+    : ui.view === "ranking" ? rankingHTML()
+    : a ? applicantHTML(a)
+    : `<div class="empty-main">Add or pick an applicant on the left to start the interview.</div>`);
+  patch(document.getElementById("modal"), modalHTML());
+  fillValues();
+}
+setInterval(() => {
+  if (!board) return;
+  document.querySelectorAll("[data-timer]").forEach(n => {
+    const a = getApp(n.dataset.timer);
+    if (a) n.textContent = fmt(elapsed(a));
+  });
+}, 250);
+
+// =====================================================================
+//  CLICKS AND TYPING
+// =====================================================================
+document.addEventListener("click", e => {
+  const el = e.target.closest("[data-act]");
+  if (!el || el.tagName === "SELECT") return;
+  const d = el.dataset, a = getApp(ui.sel);
+  switch (d.act) {
+    case "confirm-yes": { const f = ui.confirm?.run; ui.confirm = null; render(); return f && f(); }
+    case "confirm-no": ui.confirm = null; return render();
+    case "view": ui.view = d.v; ui.modal = false; return render();
+    case "add": return addApplicant();
+    case "pick": ui.sel = d.id; ui.view = "applicant"; return render();
+    case "export": return exportCSV();
+    case "import": return document.getElementById("csvfile").click();
+    case "signin": return signIn();
+    case "signout": return firebase.auth().signOut();
+    case "deltrait": return write({ [`traits/${d.kind}/${d.tid}`]: null });
+    case "addq": {
+      const s = secs.find(x => x.id === d.sid);
+      const order = Math.max(-1, ...s.questions.map(q => q.order)) + 1;
+      return write({ [`sections/${d.sid}/questions/${uid()}`]: { text: d.kind === "scenario" ? "New scenario" : "New question", kind: d.kind, order } });
+    }
+    case "delq": return write({ [`sections/${d.sid}/questions/${d.q}`]: null });
+  }
+  if (!a) return;
+  switch (d.act) {
+    case "committee": return write({ [`${A(a.id)}/committees/${d.sid}`]: applied(a, { id: d.sid }) ? null : true });
+    case "decision": return write({ [`${A(a.id)}/decision`]: decision(a) === d.d ? null : d.d });
+    case "best": return write({ [`${A(a.id)}/best`]: a.best === d.sid ? null : d.sid });
+    case "trait": return write({ [`${A(a.id)}/${d.kind}/${d.tid}`]: (a[d.kind] || {})[d.tid] ? null : true });
+    case "start": return startTimer(a);
+    case "pause": return write({ [`${A(a.id)}/timer`]: { elapsed: elapsed(a) } });
+    case "reset": return ask(`Reset the timer for ${a.name}?`, "Reset timer", () => write({ [`${A(a.id)}/timer`]: null }));
+    case "score": {
+      const up = { [`${A(a.id)}/scores/${d.q}`]: +d.n };
+      if (a.custom) up[`${A(a.id)}/picked/${d.q}`] = true;
+      return write(up);
+    }
+    case "rmq": return removeQuestion(a, d.q);
+    case "openq": ui.modal = true; ui.qsearch = ""; return render();
+    case "closeq": ui.modal = false; return render();
+    case "toggleq": return togglePick(a, secs.find(s => s.id === d.sid), d.q);
+    case "clearq": return write({ [`${A(a.id)}/custom`]: true, [`${A(a.id)}/picked`]: null, [`${A(a.id)}/scores`]: null });
+    case "delete":
+      return ask(`Delete ${a.name}? Their scores and notes will be gone for both of you.`, "Delete applicant", () => { ui.sel = null; write({ [A(a.id)]: null }); render(); });
+  }
+});
+
+document.addEventListener("input", e => {
+  const k = e.target.dataset?.bind;
+  if (!k) return;
+  const v = e.target.value;
+  const [type, x, y] = k.split(":");
+  switch (type) {
+    case "newName": ui.newName = v; return;
+    case "search": ui.search = v; return render();
+    case "qsearch": ui.qsearch = v; return render();
+    case "newtrait": ui.newtrait[x] = v; return;
+    case "banktrait": ui.banktrait[x] = v; return;
+    case "name": return write({ [`${A(x)}/name`]: v });
+    case "notes": return write({ [`${A(x)}/notes`]: v });
+    case "qnote": return write({ [`${A(x)}/qnotes/${y}`]: v || null });
+    case "sname": return write({ [`sections/${x}/name`]: v });
+    case "qtext": return write({ [`sections/${x}/questions/${y}/text`]: v });
+  }
+});
+
+document.addEventListener("change", e => {
+  const d = e.target.dataset;
+  if (d.act === "rankfilter") { ui.rank = e.target.value; render(); }
+  if (d.act === "qtype") { ui.qtype = e.target.value; render(); }
+  if (d.act === "qkind") write({ [`sections/${d.sid}/questions/${d.q}/kind`]: e.target.value });
+});
+
+document.addEventListener("keydown", e => {
+  const k = e.target.dataset?.bind || "";
+  if (e.key === "Escape" && (ui.modal || ui.confirm)) { if (ui.confirm) ui.confirm = null; else ui.modal = false; render(); }
+  if (e.key !== "Enter") return;
+  if (k === "newName") addApplicant();
+  if (k.startsWith("newtrait:")) { const kind = k.split(":")[1]; addTrait(kind, ui.newtrait[kind], ui.sel); ui.newtrait[kind] = ""; e.target.value = ""; }
+  if (k.startsWith("banktrait:")) { const kind = k.split(":")[1]; addTrait(kind, ui.banktrait[kind]); ui.banktrait[kind] = ""; e.target.value = ""; }
+});
+
+document.addEventListener("toggle", e => {
+  if (e.target.matches?.("details.notes")) ui.notesOpen = e.target.open;
+}, true);
+
+document.getElementById("csvfile").addEventListener("change", async e => {
+  const file = e.target.files[0];
+  e.target.value = "";
+  if (file) importCSV(await file.text());
+});
+
+// =====================================================================
+//  WHERE THE DATA LIVES
+// =====================================================================
+// Applies { "a/b/c": value } to a plain object, the same way Firebase does.
+function applyUpdates(obj, map) {
+  const clean = v => {
+    if (v === null || v === undefined) return undefined;
+    if (typeof v !== "object") return v;
+    const out = {};
+    for (const [k, x] of Object.entries(v)) { const c = clean(x); if (c !== undefined) out[k] = c; }
+    return Object.keys(out).length ? out : undefined;
+  };
+  for (const [path, value] of Object.entries(map)) {
+    const parts = path.split("/");
+    const trail = [obj];
+    let cur = obj;
+    for (const p of parts.slice(0, -1)) { if (typeof cur[p] !== "object" || cur[p] === null) cur[p] = {}; cur = cur[p]; trail.push(cur); }
+    const last = parts[parts.length - 1], v = clean(value);
+    if (v === undefined) delete cur[last]; else cur[last] = v;
+    for (let i = parts.length - 2; i >= 0; i--) { if (Object.keys(trail[i + 1]).length) break; delete trail[i][parts[i]]; }
+  }
+}
+
+// --- Preview mode: saves in this browser only ---
+function startLocal() {
+  let data = null;
+  try { data = JSON.parse(localStorage.getItem(LOCAL_KEY)); } catch {}
+  if (!data || !data.sections) {
+    data = {};
+    applyUpdates(data, defaultBoard());
+  }
+  const save = () => { try { localStorage.setItem(LOCAL_KEY, JSON.stringify(data)); } catch {} };
+  let channel = null;
+  try {
+    channel = new BroadcastChannel(LOCAL_KEY); // other tabs on this laptop stay in sync
+    channel.onmessage = () => { try { data = JSON.parse(localStorage.getItem(LOCAL_KEY)) || data; } catch {} setBoard(data); };
+  } catch {}
+  store = { update(map) { applyUpdates(data, map); save(); channel?.postMessage(1); setBoard(data); } };
+  save();
+  setBoard(data);
+  if (window.PRELOAD_CSV && !Object.keys(data.applicants || {}).length) importCSV(window.PRELOAD_CSV);
+}
+
+// --- Live mode: Firebase Realtime Database, shared between laptops ---
+const loadScript = src => new Promise((ok, fail) => { const s = document.createElement("script"); s.src = src; s.onload = ok; s.onerror = fail; document.head.appendChild(s); });
+async function startFirebase() {
+  if (!firebaseConfig.databaseURL || firebaseConfig.databaseURL.startsWith("PASTE")) {
+    ui.screen = "config"; ui.error = "Your Firebase config has no databaseURL. Create the Realtime Database first, then copy the config again.";
+    return render();
+  }
+  try {
+    const v = "10.12.2";
+    await loadScript(`https://www.gstatic.com/firebasejs/${v}/firebase-app-compat.js`);
+    await loadScript(`https://www.gstatic.com/firebasejs/${v}/firebase-auth-compat.js`);
+    await loadScript(`https://www.gstatic.com/firebasejs/${v}/firebase-database-compat.js`);
+    firebase.initializeApp(firebaseConfig);
+  } catch (err) {
+    ui.screen = "config"; ui.error = "Couldn't load Firebase. Check your internet connection and refresh.";
+    return render();
+  }
+  const db = firebase.database();
+  const boardRef = db.ref("board");
+  store = { update: map => boardRef.update(map).catch(err => toast("Couldn't save: " + err.message)) };
+
+  db.ref(".info/serverTimeOffset").on("value", s => (serverOffset = s.val() || 0));
+
+  let presenceRef = null;
+  firebase.auth().onAuthStateChanged(user => {
+    boardRef.off(); db.ref("presence").off(); db.ref(".info/connected").off();
+    if (presenceRef) { presenceRef.remove().catch(() => {}); presenceRef = null; }
+    ui.user = user;
+    board = null;
+    if (!user) { ui.screen = "signin"; return render(); }
+    ui.screen = "loading"; render();
+
+    boardRef.on("value", snap => {
+      const raw = snap.val();
+      if (!raw || !raw.sections) {
+        // first time ever: create the committees, questions and words (only one laptop does this)
+        boardRef.child("meta").transaction(cur => (cur ? undefined : { createdAt: Date.now() }), (err, committed) => {
+          if (!err && committed) boardRef.update(defaultBoard());
+        });
+      }
+      ui.screen = "app";
+      setBoard(raw);
+    }, err => {
+      ui.screen = err.code === "PERMISSION_DENIED" || /permission/i.test(err.message) ? "denied" : "config";
+      ui.error = err.message;
+      render();
+    });
+
+    db.ref(".info/connected").on("value", s => {
+      ui.conn = s.val() ? "live" : "offline";
+      if (s.val()) {
+        presenceRef = db.ref("presence/" + user.uid + "-" + uid());
+        presenceRef.onDisconnect().remove();
+        presenceRef.set((user.displayName || user.email || "Someone").split(" ")[0]);
+      }
+      render();
+    });
+    db.ref("presence").on("value", s => {
+      ui.people = [...new Set(Object.values(s.val() || {}))];
+      render();
+    }, () => {});
+  });
+}
+function signIn() {
+  ui.error = "";
+  firebase.auth().signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(err => {
+    ui.error = err.code === "auth/unauthorized-domain"
+      ? "This website's address isn't in Firebase → Authentication → Settings → Authorized domains yet (guide: Part 3, Step 3)."
+      : err.message;
+    render();
+  });
+}
+
+if (CONFIGURED) { render(); startFirebase(); } else startLocal();
+</script>
+</body>
+</html>
